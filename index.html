@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تحدي البرمجة - التكرار</title>
+    
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
+        
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #f1f5f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        .animate-pop-in {
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            animation: confetti-fall 3s linear infinite;
+        }
+
+        @keyframes confetti-fall {
+            0% { transform: translateY(-10px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            75% { transform: translateX(8px); }
+        }
+        .animate-shake { animation: shake 0.3s ease-in-out; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function App() {
+            const [view, setView] = useState('home'); 
+            const [students, setStudents] = useState([]);
+            const [currentStudentName, setCurrentStudentName] = useState('');
+            const [currentLevel, setCurrentLevel] = useState(1);
+            const [feedback, setFeedback] = useState({ q1: null, q2: null, l3: null });
+            
+            const [l1Answers, setL1Answers] = useState({ q1: null, q2: null });
+            const [l2Answers, setL2Answers] = useState({ q1: null, q2: null });
+            const [blanks, setBlanks] = useState([null, null, null, null, null]);
+
+            const [showTeacherAuth, setShowTeacherAuth] = useState(false);
+            const [passInput, setPassInput] = useState('');
+
+            const getLevelTitle = (num) => {
+                switch(num) {
+                    case 1: return "المستوى 1: صح أو خطأ";
+                    case 2: return "المستوى 2: أختر الإجابة الصحيحة";
+                    case 3: return "المستوى 3: أكمل الفراغات";
+                    default: return "";
+                }
+            };
+
+            const startPlay = (name) => {
+                if (!name.trim()) return;
+                const trimmedName = name.trim();
+                setStudents(prev => {
+                    const exists = prev.find(s => s.name === trimmedName);
+                    if (!exists) {
+                        return [...prev, { 
+                            id: Date.now(), 
+                            name: trimmedName, 
+                            level: 1, 
+                            isCompleted: false,
+                            lastUpdate: new Date().toLocaleTimeString('ar-SA') 
+                        }];
+                    }
+                    return prev;
+                });
+                setCurrentStudentName(trimmedName);
+                setCurrentLevel(1);
+                setView('student');
+                resetLevelStates();
+            };
+
+            const trackProgress = (levelNum, isFinal = false) => {
+                setStudents(prev => prev.map(s => 
+                    s.name === currentStudentName 
+                    ? { ...s, level: levelNum, isCompleted: isFinal, lastUpdate: new Date().toLocaleTimeString('ar-SA') } 
+                    : s
+                ));
+            };
+
+            const resetLevelStates = () => {
+                setFeedback({ q1: null, q2: null, l3: null });
+                setL1Answers({ q1: null, q2: null });
+                setL2Answers({ q1: null, q2: null });
+                setBlanks([null, null, null, null, null]);
+            };
+
+            const handleCheckLevel1 = () => {
+                const q1Correct = l1Answers.q1 === true; 
+                const q2Correct = l1Answers.q2 === true;
+                setFeedback({ ...feedback, q1: q1Correct ? 'correct' : 'wrong', q2: q2Correct ? 'correct' : 'wrong' });
+                if (q1Correct && q2Correct) {
+                    setTimeout(() => { trackProgress(2); setView('encouragement'); }, 600);
+                }
+            };
+
+            const handleCheckLevel2 = () => {
+                const q1Correct = l2Answers.q1 === 'b';
+                const q2Correct = l2Answers.q2 === 'a';
+                setFeedback({ ...feedback, q1: q1Correct ? 'correct' : 'wrong', q2: q2Correct ? 'correct' : 'wrong' });
+                if (q1Correct && q2Correct) {
+                    setTimeout(() => { trackProgress(3); setView('encouragement'); }, 600);
+                }
+            };
+
+            const handleCheckLevel3 = () => {
+                const correctWords = ['حالة منطقية', 'صحيحة', 'تخطي', 'الأوامر', 'تنفيذها'];
+                if (blanks.includes(null)) {
+                    setFeedback({...feedback, l3: 'incomplete'});
+                    return;
+                }
+                if (blanks.every((w, i) => w === correctWords[i])) {
+                    setFeedback({...feedback, l3: 'correct'});
+                    setTimeout(() => { trackProgress(3, true); setView('final'); }, 800);
+                } else {
+                    setFeedback({...feedback, l3: 'wrong'});
+                }
+            };
+
+            const getBtnClass = (qKey, btnValue, currentVal) => {
+                let base = "flex-1 py-3 px-3 rounded-xl font-bold border-2 transition-all duration-200 transform active:scale-95 text-sm md:text-base text-right ";
+                if (currentVal === btnValue) {
+                    if (feedback[qKey] === 'correct') return base + "bg-green-500 border-green-600 text-white";
+                    if (feedback[qKey] === 'wrong') return base + "bg-red-500 border-red-600 text-white animate-shake";
+                    return base + "bg-indigo-600 border-indigo-700 text-white shadow-md";
+                }
+                return base + "bg-white border-gray-100 text-gray-700 hover:border-indigo-200 shadow-sm";
+            };
+
+            return (
+                <div className="min-h-screen flex flex-col items-center justify-center p-4">
+                    
+                    {view === 'home' && (
+                        <div className="bg-white p-10 rounded-[2.5rem] shadow-2xl w-full max-w-md animate-pop-in text-center border-b-8 border-indigo-200">
+                          
+                            <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-indigo-600 p-4 rounded-full shadow-xl">
+                                <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                            </div> 
+                            <h1 className="text-3xl font-black text-indigo-900 mb-2 mt-4">تحدي التكرار</h1>
+                            <br/>
+                            <input id="stdName" type="text" placeholder="اكتبي اسمكِ ..." className="w-full p-4 border-2 border-indigo-50 rounded-2xl mb-4 text-center text-xl font-bold outline-none focus:border-indigo-500 bg-indigo-50/30 transition-all" />
+                            <button onClick={() => startPlay(document.getElementById('stdName').value)} className="w-full gradient-bg text-white py-4 rounded-2xl text-xl font-black shadow-xl hover:opacity-90 active:scale-95 transition-all mb-4">انطـلاق 🚀</button>
+                            <button onClick={() => setShowTeacherAuth(true)} className="text-indigo-400 font-bold text-sm hover:underline">لوحة المعلمة 👩‍🏫</button>
+
+                            {showTeacherAuth && (
+                                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                                    <div className="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-xs animate-pop-in">
+                                        <h2 className="text-xl font-black mb-4">الدخول للمعلمة</h2>
+                                        <input type="password" placeholder="كلمة المرور" value={passInput} onChange={(e) => setPassInput(e.target.value)} className="w-full p-3 border-2 rounded-xl mb-4 text-center outline-none" />
+                                        <div className="flex gap-2">
+                                            <button onClick={() => { if (passInput === '2023') { setView('teacher'); setShowTeacherAuth(false); setPassInput(''); } else { alert('كلمة مرور خاطئة!'); } }} className="flex-1 bg-indigo-600 text-white py-2 rounded-xl font-bold">دخول</button>
+                                            <button onClick={() => setShowTeacherAuth(false)} className="flex-1 bg-gray-100 py-2 rounded-xl font-bold">إلغاء</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {view === 'student' && (
+                        <div className="w-full max-w-2xl bg-white rounded-[2.5rem] shadow-2xl overflow-hidden animate-pop-in border-b-8 border-indigo-100">
+                            <div className="gradient-bg p-6 text-white flex justify-between items-center shadow-lg">
+                                <span className="font-black text-lg md:text-xl">{getLevelTitle(currentLevel)}</span>
+                                <span className="bg-white/20 px-4 py-1 rounded-full text-xs md:text-sm font-bold">{currentStudentName}</span>
+                            </div>
+                            <div className="p-8">
+                                {currentLevel === 1 && (
+                                    <div className="space-y-8">
+                                        <div className="bg-indigo-50/30 p-5 rounded-2xl border border-indigo-50">
+                                            <p className="text-lg font-black mb-4 text-indigo-900 leading-relaxed">س1: هل التكرار يعني كتابة الكود مرة واحدة فقط لينفذ عدة مرات؟</p>
+                                            <div className="flex gap-4">
+                                                <button onClick={() => {setL1Answers({...l1Answers, q1: true}); setFeedback({...feedback, q1: null})}} className={getBtnClass('q1', true, l1Answers.q1).replace('text-right', 'text-center')}>صح ✅</button>
+                                                <button onClick={() => {setL1Answers({...l1Answers, q1: false}); setFeedback({...feedback, q1: null})}} className={getBtnClass('q1', false, l1Answers.q1).replace('text-right', 'text-center')}>خطأ ❌</button>
+                                            </div>
+                                        </div>
+                                        <div className="bg-indigo-50/30 p-5 rounded-2xl border border-indigo-50">
+                                            <p className="text-lg font-black mb-4 text-indigo-900 leading-relaxed">س2: التكرار المشروط يتوقف عندما تصبح الحالة "صحيحة"؟</p>
+                                            <div className="flex gap-4">
+                                                <button onClick={() => {setL1Answers({...l1Answers, q2: true}); setFeedback({...feedback, q2: null})}} className={getBtnClass('q2', true, l1Answers.q2).replace('text-right', 'text-center')}>صح ✅</button>
+                                                <button onClick={() => {setL1Answers({...l1Answers, q2: false}); setFeedback({...feedback, q2: null})}} className={getBtnClass('q2', false, l1Answers.q2).replace('text-right', 'text-center')}>خطأ ❌</button>
+                                            </div>
+                                        </div>
+                                        <button onClick={handleCheckLevel1} className="w-full gradient-bg text-white py-5 rounded-2xl font-black text-xl shadow-lg mt-4 active:scale-95 transition-all">تأكيـد للانتقال للمستوى2 🚀</button>
+                                    </div>
+                                )}
+                                {currentLevel === 2 && (
+                                    <div className="space-y-8">
+                                        <div className="bg-indigo-50/30 p-5 rounded-2xl">
+                                            <p className="text-lg font-black mb-4 text-indigo-900">س1: متى نستخدم التكرار في البرمجة؟</p>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                                <button onClick={() => {setL2Answers({...l2Answers, q1: 'a'}); setFeedback({...feedback, q1: null})}} className={getBtnClass('q1', 'a', l2Answers.q1)}>أ) لطباعة جملة واحدة فقط.</button>
+                                                <button onClick={() => {setL2Answers({...l2Answers, q1: 'b'}); setFeedback({...feedback, q1: null})}} className={getBtnClass('q1', 'b', l2Answers.q1)}>ب) لتنفيذ مجموعة أوامر عدة مرات.</button>
+                                                <button onClick={() => {setL2Answers({...l2Answers, q1: 'c'}); setFeedback({...feedback, q1: null})}} className={getBtnClass('q1', 'c', l2Answers.q1)}>ج) لإغلاق الحاسوب فجأة.</button>
+                                                <button onClick={() => {setL2Answers({...l2Answers, q1: 'd'}); setFeedback({...feedback, q1: null})}} className={getBtnClass('q1', 'd', l2Answers.q1)}>د) لتغيير ألوان شريط المهام.</button>
+                                            </div>
+                                        </div>
+                                        <div className="bg-indigo-50/30 p-5 rounded-2xl">
+                                            <p className="text-lg font-black mb-4 text-indigo-900">س2: التكرار المشروط هو التكرار الذي يعتمد على:</p>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                                <button onClick={() => {setL2Answers({...l2Answers, q2: 'a'}); setFeedback({...feedback, q2: null})}} className={getBtnClass('q2', 'a', l2Answers.q2)}>أ) حالة منطقية (Condition)</button>
+                                                <button onClick={() => {setL2Answers({...l2Answers, q2: 'b'}); setFeedback({...feedback, q2: null})}} className={getBtnClass('q2', 'b', l2Answers.q2)}>ب) لون الكود وشكله</button>
+                                                <button onClick={() => {setL2Answers({...l2Answers, q2: 'c'}); setFeedback({...feedback, q2: null})}} className={getBtnClass('q2', 'c', l2Answers.q2)}>ج) حجم لوحة المفاتيح</button>
+                                                <button onClick={() => {setL2Answers({...l2Answers, q2: 'd'}); setFeedback({...feedback, q2: null})}} className={getBtnClass('q2', 'd', l2Answers.q2)}>د) سرعة الماوس</button>
+                                            </div>
+                                        </div>
+                                        <button onClick={handleCheckLevel2} className="w-full gradient-bg text-white py-5 rounded-2xl font-black text-xl shadow-lg active:scale-95 transition-all">تأكيـد للانتقال للمستوى 3✨</button>
+                                    </div>
+                                )}
+                                {currentLevel === 3 && (
+                                    <div className="space-y-6">
+                                        <h2 className="text-xl font-black text-indigo-900 mb-4">قومي بسحب الكلمات لملء الفراغات:</h2>
+                                        
+                                        {feedback.l3 === 'wrong' && (
+                                            <div className="bg-red-50 text-red-600 p-4 rounded-xl font-bold border-2 border-red-100 flex items-center gap-2 animate-shake">
+                                                <span>❌ الترتيب خاطئ يا بطلة! راجعي ترتيب الكلمات لتصححي إجابتكِ.</span>
+                                            </div>
+                                        )}
+                                        {feedback.l3 === 'incomplete' && (
+                                            <div className="bg-amber-50 text-amber-700 p-4 rounded-xl font-bold border-2 border-amber-100">
+                                                <span>💡 يرجى تعبئة كافة الفراغات لإكمال الجملة.</span>
+                                            </div>
+                                        )}
+
+                                        <div className="flex flex-wrap gap-3 p-4 bg-slate-50 rounded-2xl border-2 border-slate-100 shadow-inner">
+                                            {['تنفيذها', 'تخطي', 'حالة منطقية', 'الأوامر', 'صحيحة'].map(word => (
+                                                <button 
+                                                    key={word} 
+                                                    onClick={() => {
+                                                        const emptyIdx = blanks.indexOf(null);
+                                                        if (emptyIdx !== -1 && !blanks.includes(word)) {
+                                                            const nextBlanks = [...blanks];
+                                                            nextBlanks[emptyIdx] = word;
+                                                            setBlanks(nextBlanks);
+                                                            setFeedback({...feedback, l3: null});
+                                                        }
+                                                    }}
+                                                    disabled={blanks.includes(word)}
+                                                    className={`px-4 py-2 rounded-xl font-bold transition-all shadow-sm ${blanks.includes(word) ? 'bg-gray-200 text-gray-400 scale-95' : 'bg-white text-indigo-700 hover:bg-indigo-100 active:scale-90 border-2 border-indigo-50'}`}
+                                                >
+                                                    {word}
+                                                </button>
+                                            ))}
+                                        </div>
+
+                                        <div className={`p-8 border-4 border-dashed rounded-[2rem] leading-relaxed text-lg font-bold transition-all ${feedback.l3 === 'wrong' ? 'border-red-300 bg-red-50 text-red-900' : 'border-indigo-100 bg-slate-50 text-slate-700'}`}>
+                                            يعتمد التكرار المشروط على <span className="text-indigo-600 bg-white px-2 py-1 rounded-lg border border-indigo-100 mx-1">{blanks[0] || "......"}</span> فإذا كانت <span className="text-indigo-600 bg-white px-2 py-1 rounded-lg border border-indigo-100 mx-1">{blanks[1] || "......"}</span> سيستمر، وإلا سيتم <span className="text-indigo-600 bg-white px-2 py-1 rounded-lg border border-indigo-100 mx-1">{blanks[2] || "......"}</span> الحلقة. <br/> التكرار هو تكرار مجموعة من <span className="text-indigo-600 bg-white px-2 py-1 rounded-lg border border-indigo-100 mx-1">{blanks[3] || "......"}</span> لتسهيل الـ <span className="text-indigo-600 bg-white px-2 py-1 rounded-lg border border-indigo-100 mx-1">{blanks[4] || "......"}</span> البرمجي.
+                                        </div>
+
+                                        <div className="flex gap-4">
+                                            <button onClick={() => {setBlanks([null,null,null,null,null]); setFeedback({...feedback, l3: null});}} className="flex-1 bg-slate-200 py-4 rounded-2xl font-bold hover:bg-slate-300 transition-colors">إعادة ضبط 🔄</button>
+                                            <button onClick={handleCheckLevel3} className="flex-[2] gradient-bg text-white py-4 rounded-2xl font-black text-xl shadow-xl hover:scale-105 transition-transform active:scale-95">فحص الإجابة 🏆</button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                    {view === 'encouragement' && (
+                        <div className="fixed inset-0 bg-indigo-900/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
+                            <div className="bg-white p-10 rounded-[3rem] text-center animate-pop-in max-w-sm w-full shadow-2xl border-t-8 border-indigo-500">
+                                <div className="text-7xl mb-6">🎉</div>
+                                <h2 className="text-3xl font-black text-indigo-900 mb-2">رائعة جداً!</h2>
+                                <p className="text-gray-600 font-bold text-lg mb-8">لقد أنهيتِ {getLevelTitle(currentLevel)} بنجاح باهر.</p>
+                                <button onClick={() => { setView('student'); setCurrentLevel(currentLevel + 1); resetLevelStates(); }} className="w-full gradient-bg text-white py-5 rounded-2xl text-xl font-black shadow-lg">التالي 🚀</button>
+                            </div>
+                        </div>
+                    )}
+
+                    {view === 'final' && (
+                        <div className="fixed inset-0 bg-indigo-950 flex items-center justify-center z-50 p-4 overflow-hidden">
+                            {[...Array(30)].map((_, i) => (
+                                <div key={i} className="confetti" style={{
+                                    left: Math.random()*100+'%', 
+                                    animationDelay: Math.random()*2+'s', 
+                                    backgroundColor: ['#fbbf24', '#ec4899', '#22d3ee', '#4ade80'][i%4],
+                                    width: (Math.random()*10+5)+'px',
+                                    height: (Math.random()*10+5)+'px'
+                                }}></div>
+                            ))}
+                            <div className="bg-white p-12 rounded-[4rem] text-center animate-pop-in max-w-md w-full shadow-2xl relative z-10 border-b-8 border-indigo-200">
+                                <div className="text-8xl mb-8 animate-bounce">🏆</div>
+                                <h2 className="text-4xl font-black text-indigo-900 mb-4">بطلة البرمجة!</h2>
+                                <p className="text-gray-600 font-black text-2xl mb-10 leading-relaxed">
+                                    أحسنتِ يا <span className="text-indigo-600">{currentStudentName}</span>!<br/>
+                                    لقد أصبحتِ خبيرة في التكرار.
+                                </p>
+                                <div className="p-4 bg-indigo-50 rounded-2xl border-2 border-indigo-100 font-bold text-indigo-800">
+                                    استمري في البرمجة لتغيري العالم! ✨
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {view === 'teacher' && (
+                        <div className="w-full max-w-5xl bg-white rounded-[2.5rem] shadow-2xl overflow-hidden animate-pop-in">
+                            <div className="bg-indigo-900 p-8 text-white flex justify-between items-center">
+                                <div><h1 className="text-2xl font-black">نتائج تحدي التكرار</h1></div>
+                                <button onClick={() => setView('home')} className="bg-indigo-800 px-6 py-2 rounded-xl font-bold border border-indigo-700 hover:bg-indigo-700 transition-colors">خروج</button>
+                            </div>
+                            <div className="p-8 overflow-x-auto">
+                                <table className="w-full text-right border-collapse">
+                                    <thead>
+                                        <tr className="border-b-2 border-slate-100 text-slate-400 font-black text-sm uppercase">
+                                            <th className="p-4">اسم الطالبة</th>
+                                            <th className="p-4 text-center w-1/4">مستوى الحل والتقدم</th>
+                                            <th className="p-4 text-center">الحالة</th>
+                                            <th className="p-4 text-center">آخر تحديث</th>
+                                            <th className="p-4 text-center">إجراء</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {students.length === 0 ? (
+                                            <tr><td colSpan="5" className="p-10 text-center text-slate-400 italic font-bold">لا توجد بيانات حالياً .. بانتظار دخول الطالبات 🚀</td></tr>
+                                        ) : (
+                                            students.map(s => (
+                                                <tr key={s.id} className="border-b border-slate-50 hover:bg-slate-50 transition-all">
+                                                    <td className="p-4 font-black text-indigo-900 text-lg">{s.name}</td>
+                                                    <td className="p-4">
+                                                        <div className="flex flex-col items-center gap-2">
+                                                            <span className="font-bold text-indigo-700 text-sm">
+                                                                {s.isCompleted ? "أنهت جميع المستويات" : `المستوى ${s.level} من 3`}
+                                                            </span>
+                                                            <div className="w-full bg-slate-200 rounded-full h-2.5 max-w-[150px] shadow-inner overflow-hidden">
+                                                                <div 
+                                                                    className={`h-2.5 rounded-full transition-all duration-500 ${s.isCompleted ? 'bg-green-500' : 'bg-indigo-500'}`} 
+                                                                    style={{width: s.isCompleted ? '100%' : `${(s.level / 3) * 100}%`}}>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td className="p-4 text-center">
+                                                        {s.isCompleted ? 
+                                                            <span className="bg-green-100 text-green-700 px-4 py-1.5 rounded-full text-xs font-black border border-green-200 shadow-sm">مكتمل 🏁</span> : 
+                                                            <span className="bg-amber-100 text-amber-700 px-4 py-1.5 rounded-full text-xs font-black border border-amber-200 shadow-sm">قيد التقدم ⏳</span>
+                                                        }
+                                                    </td>
+                                                    <td className="p-4 text-center text-slate-400 text-sm font-bold">{s.lastUpdate}</td>
+                                                    <td className="p-4 text-center">
+                                                        <button onClick={() => setStudents(students.filter(std => std.id !== s.id))} className="text-red-400 hover:text-red-600 bg-red-50 hover:bg-red-100 px-3 py-1 rounded-lg font-bold transition-colors text-sm">حذف</button>
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
