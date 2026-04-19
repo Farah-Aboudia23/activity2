@@ -1,392 +1,736 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تحدي البرمجة - التكرار</title>
-    
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تحدي التكرار 🔁</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f0c29;
+  --card:#1a1744;
+  --card2:#221e55;
+  --indigo:#6366f1;
+  --purple:#a855f7;
+  --green:#22c55e;
+  --red:#ef4444;
+  --yellow:#fbbf24;
+  --cyan:#22d3ee;
+  --text:#f1f5f9;
+  --muted:#94a3b8;
+  --shadow:0 20px 60px rgba(99,102,241,.25);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Tajawal',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
 
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap');
-        
-        body {
-            font-family: 'Cairo', sans-serif;
-            background-color: #f1f5f9;
-            margin: 0;
-            padding: 0;
-        }
+/* ANIMATED BG */
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(ellipse at 20% 30%,rgba(99,102,241,.18) 0%,transparent 55%),
+    radial-gradient(ellipse at 80% 70%,rgba(168,85,247,.14) 0%,transparent 55%),
+    radial-gradient(ellipse at 50% 10%,rgba(34,211,238,.08) 0%,transparent 40%);
+}
 
-        .animate-pop-in {
-            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-        }
+/* VIEWS */
+.view{display:none;position:relative;z-index:1;min-height:100vh;
+  display:none;align-items:center;justify-content:center;padding:20px}
+.view.active{display:flex}
+.view.active.top{align-items:flex-start;padding-top:20px}
 
-        @keyframes popIn {
-            from { opacity: 0; transform: scale(0.9); }
-            to { opacity: 1; transform: scale(1); }
-        }
+/* ═══ HOME ═══ */
+.home-card{
+  background:var(--card);border-radius:32px;padding:46px 36px;width:100%;max-width:440px;
+  text-align:center;border:1px solid rgba(99,102,241,.25);box-shadow:var(--shadow);
+  animation:popIn .5s cubic-bezier(.36,1.56,.64,1)
+}
+@keyframes popIn{from{transform:scale(.88);opacity:0}to{transform:scale(1);opacity:1}}
+.home-icon{font-size:5em;display:block;margin-bottom:14px;animation:float 3s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+.home-card h1{font-size:2em;font-weight:900;margin-bottom:6px;
+  background:linear-gradient(90deg,#818cf8,#c084fc,#67e8f9);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.home-card p{color:var(--muted);font-size:1em;margin-bottom:28px;line-height:1.65}
+.name-sel{
+  width:100%;padding:14px 16px;background:var(--card2);
+  border:2px solid rgba(99,102,241,.3);border-radius:16px;
+  color:var(--text);font-family:'Tajawal',sans-serif;font-size:1.05em;
+  margin-bottom:16px;cursor:pointer;appearance:none;transition:border-color .2s
+}
+.name-sel:focus{outline:none;border-color:var(--indigo)}
+.name-sel option{background:#1a1744}
+.go-btn{
+  width:100%;padding:16px;border:none;border-radius:16px;
+  background:linear-gradient(135deg,var(--indigo),var(--purple));
+  color:#fff;font-family:'Tajawal',sans-serif;font-size:1.15em;font-weight:900;
+  cursor:pointer;box-shadow:0 8px 24px rgba(99,102,241,.45);
+  transition:transform .2s,box-shadow .2s;margin-bottom:14px
+}
+.go-btn:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(99,102,241,.55)}
+.teacher-link{color:rgba(99,102,241,.7);font-size:.88em;font-weight:700;
+  background:none;border:none;cursor:pointer;font-family:'Tajawal',sans-serif}
+.teacher-link:hover{color:var(--indigo);text-decoration:underline}
 
-        .gradient-bg {
-            background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
-        }
+/* ═══ STUDENT SCREEN ═══ */
+.student-card{
+  background:var(--card);border-radius:28px;width:100%;max-width:680px;
+  overflow:hidden;box-shadow:var(--shadow);border:1px solid rgba(99,102,241,.2);
+  animation:popIn .4s cubic-bezier(.36,1.56,.64,1)
+}
+.level-header{
+  background:linear-gradient(135deg,var(--indigo),var(--purple));
+  padding:18px 24px;display:flex;justify-content:space-between;align-items:center
+}
+.lh-title{font-size:1.1em;font-weight:900;color:#fff}
+.lh-name{background:rgba(255,255,255,.2);border-radius:20px;padding:5px 14px;
+  font-size:.85em;font-weight:700;color:#fff}
 
-        .confetti {
-            position: absolute;
-            width: 10px;
-            height: 10px;
-            animation: confetti-fall 3s linear infinite;
-        }
+/* PROGRESS BAR */
+.prog-bar{height:5px;background:rgba(99,102,241,.2)}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--cyan),var(--indigo));transition:width .5s}
 
-        @keyframes confetti-fall {
-            0% { transform: translateY(-10px) rotate(0deg); opacity: 1; }
-            100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
-        }
+.level-body{padding:28px}
 
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-8px); }
-            75% { transform: translateX(8px); }
-        }
-        .animate-shake { animation: shake 0.3s ease-in-out; }
-    </style>
+/* LEVEL BADGE */
+.lvl-badge{
+  display:inline-block;background:rgba(99,102,241,.15);border:1.5px solid rgba(99,102,241,.3);
+  border-radius:12px;padding:5px 14px;font-size:.85em;font-weight:800;
+  color:#a5b4fc;margin-bottom:18px
+}
+
+/* Q CARD */
+.q-card{background:var(--card2);border-radius:18px;padding:20px;margin-bottom:18px;
+  border:1.5px solid rgba(99,102,241,.12)}
+.q-text{font-size:1.05em;font-weight:800;color:var(--text);line-height:1.6;margin-bottom:14px}
+
+/* OPTIONS */
+.opts-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.opts-4{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.opt-btn{
+  padding:12px 14px;border-radius:14px;border:2.5px solid rgba(255,255,255,.08);
+  background:rgba(255,255,255,.05);color:var(--text);
+  font-family:'Tajawal',sans-serif;font-size:.95em;font-weight:700;
+  cursor:pointer;transition:all .2s cubic-bezier(.36,1.56,.64,1);text-align:right;
+  line-height:1.4
+}
+.opt-btn:hover{border-color:rgba(99,102,241,.5);background:rgba(99,102,241,.12);transform:translateY(-1px)}
+.opt-btn.selected{background:rgba(99,102,241,.25);border-color:var(--indigo);color:#a5b4fc}
+.opt-btn.correct{background:rgba(34,197,94,.2)!important;border-color:var(--green)!important;
+  color:#86efac!important;animation:correctPop .4s cubic-bezier(.36,1.56,.64,1)}
+.opt-btn.wrong{background:rgba(239,68,68,.2)!important;border-color:var(--red)!important;
+  color:#fca5a5!important;animation:shake .3s ease}
+@keyframes correctPop{0%{transform:scale(1)}50%{transform:scale(1.06)}100%{transform:scale(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+
+/* CONFIRM BTN */
+.confirm-btn{
+  width:100%;padding:15px;border:none;border-radius:16px;
+  background:linear-gradient(135deg,var(--indigo),var(--purple));
+  color:#fff;font-family:'Tajawal',sans-serif;font-size:1.1em;font-weight:900;
+  cursor:pointer;margin-top:6px;box-shadow:0 6px 20px rgba(99,102,241,.35);
+  transition:transform .2s
+}
+.confirm-btn:hover{transform:translateY(-2px)}
+
+/* ═══ LEVEL 3 — FILL BLANKS ═══ */
+.words-bank{display:flex;flex-wrap:wrap;gap:8px;padding:14px;
+  background:rgba(255,255,255,.04);border-radius:14px;
+  border:1.5px solid rgba(255,255,255,.07);margin-bottom:16px}
+.word-chip{
+  padding:7px 14px;border-radius:11px;font-size:.9em;font-weight:800;
+  cursor:pointer;transition:all .2s cubic-bezier(.36,1.56,.64,1);
+  background:rgba(99,102,241,.2);color:#a5b4fc;border:1.5px solid rgba(99,102,241,.35)
+}
+.word-chip:hover{background:rgba(99,102,241,.35);transform:scale(1.06)}
+.word-chip.used{background:rgba(255,255,255,.05);color:rgba(255,255,255,.25);
+  border-color:rgba(255,255,255,.05);cursor:not-allowed;transform:none}
+
+.blank-text{
+  background:rgba(255,255,255,.04);border-radius:18px;
+  border:2px dashed rgba(99,102,241,.25);padding:18px 20px;
+  font-size:1em;font-weight:700;color:var(--text);line-height:2.2;
+  margin-bottom:14px
+}
+.blank-text.wrong-state{border-color:rgba(239,68,68,.4);background:rgba(239,68,68,.06)}
+.blank{
+  display:inline-block;background:rgba(99,102,241,.2);border:1.5px solid rgba(99,102,241,.4);
+  border-radius:9px;padding:3px 12px;color:#a5b4fc;font-weight:800;
+  min-width:80px;text-align:center;cursor:pointer;transition:.2s;margin:0 4px
+}
+.blank:hover{background:rgba(239,68,68,.2);border-color:var(--red)}
+.blank.empty{color:rgba(255,255,255,.3);border-style:dashed}
+
+.l3-actions{display:grid;grid-template-columns:1fr 2fr;gap:10px}
+.reset-btn{padding:13px;border:1.5px solid rgba(255,255,255,.1);border-radius:14px;
+  background:rgba(255,255,255,.05);color:var(--muted);
+  font-family:'Tajawal',sans-serif;font-size:.95em;font-weight:700;cursor:pointer;transition:.2s}
+.reset-btn:hover{background:rgba(255,255,255,.1);color:var(--text)}
+
+/* ALERTS */
+.alert{border-radius:14px;padding:12px 16px;font-size:.9em;font-weight:700;
+  margin-bottom:12px;display:flex;align-items:center;gap:8px;animation:slideDown .3s ease}
+@keyframes slideDown{from{transform:translateY(-8px);opacity:0}to{transform:translateY(0);opacity:1}}
+.alert-err{background:rgba(239,68,68,.15);border:1.5px solid rgba(239,68,68,.3);color:#fca5a5}
+.alert-warn{background:rgba(251,191,36,.12);border:1.5px solid rgba(251,191,36,.3);color:#fde68a}
+
+/* ═══ ENCOURAGEMENT OVERLAY ═══ */
+.overlay{position:fixed;inset:0;background:rgba(15,12,41,.85);
+  backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;
+  z-index:50;padding:20px}
+.enc-card{
+  background:var(--card);border-radius:32px;padding:48px 36px;text-align:center;
+  max-width:380px;width:100%;border:2px solid rgba(99,102,241,.3);
+  box-shadow:0 0 60px rgba(99,102,241,.3);animation:popIn .5s cubic-bezier(.36,1.56,.64,1)
+}
+.enc-icon{font-size:5em;margin-bottom:16px;display:block}
+.enc-card h2{font-size:1.9em;font-weight:900;margin-bottom:8px;
+  background:linear-gradient(90deg,#818cf8,#c084fc);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.enc-card p{color:var(--muted);font-size:1em;margin-bottom:24px;line-height:1.6}
+.enc-btn{
+  width:100%;padding:15px;border:none;border-radius:16px;
+  background:linear-gradient(135deg,var(--indigo),var(--purple));
+  color:#fff;font-family:'Tajawal',sans-serif;font-size:1.15em;font-weight:900;
+  cursor:pointer;box-shadow:0 8px 24px rgba(99,102,241,.4);transition:transform .2s
+}
+.enc-btn:hover{transform:translateY(-2px)}
+
+/* ═══ FINAL SCREEN ═══ */
+.final-overlay{position:fixed;inset:0;background:linear-gradient(135deg,#0f0c29,#1a0a2e);
+  display:flex;align-items:center;justify-content:center;z-index:60;padding:20px;overflow:hidden}
+.final-card{
+  background:var(--card);border-radius:36px;padding:52px 36px;text-align:center;
+  max-width:420px;width:100%;border:2px solid rgba(99,102,241,.3);
+  box-shadow:0 0 80px rgba(168,85,247,.3);animation:popIn .6s cubic-bezier(.36,1.56,.64,1);
+  position:relative;z-index:2
+}
+.final-trophy{font-size:5.5em;display:block;margin-bottom:16px;animation:bounce 1s ease-in-out infinite}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-18px)}}
+.final-card h2{font-size:2.2em;font-weight:900;margin-bottom:8px;
+  background:linear-gradient(90deg,#fbbf24,#f97316,#ec4899);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.final-name{font-size:1.6em;font-weight:900;color:#a5b4fc;margin:10px 0}
+.final-msg{color:var(--muted);font-size:1em;margin-bottom:24px;line-height:1.65}
+.final-box{background:rgba(99,102,241,.12);border:1.5px solid rgba(99,102,241,.25);
+  border-radius:16px;padding:14px 18px;font-size:.95em;font-weight:700;color:#a5b4fc;margin-bottom:24px}
+.replay-btn{
+  width:100%;padding:14px;border:none;border-radius:14px;
+  background:rgba(99,102,241,.2);color:#a5b4fc;
+  font-family:'Tajawal',sans-serif;font-size:1em;font-weight:800;cursor:pointer;transition:.2s
+}
+.replay-btn:hover{background:rgba(99,102,241,.35);color:#fff}
+
+/* CONFETTI */
+.conf{position:fixed;border-radius:3px;pointer-events:none;z-index:61;animation:fall 3s linear forwards}
+@keyframes fall{0%{transform:translateY(-20px) rotate(0);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
+
+/* ═══ TEACHER MODAL ═══ */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(6px);
+  display:flex;align-items:center;justify-content:center;z-index:70;padding:20px;display:none}
+.modal-overlay.show{display:flex}
+.modal-card{background:var(--card);border-radius:24px;padding:32px;width:100%;max-width:320px;
+  border:1.5px solid rgba(99,102,241,.3);box-shadow:var(--shadow);animation:popIn .4s ease}
+.modal-card h2{font-size:1.3em;font-weight:900;color:var(--text);margin-bottom:16px}
+.pass-input{width:100%;padding:12px 16px;background:var(--card2);border:2px solid rgba(99,102,241,.3);
+  border-radius:12px;color:var(--text);font-family:'Tajawal',sans-serif;font-size:1em;
+  margin-bottom:14px;text-align:center;letter-spacing:4px}
+.pass-input:focus{outline:none;border-color:var(--indigo)}
+.modal-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.modal-ok{padding:11px;border:none;border-radius:12px;background:var(--indigo);color:#fff;
+  font-family:'Tajawal',sans-serif;font-size:1em;font-weight:800;cursor:pointer}
+.modal-cancel{padding:11px;border:1px solid rgba(255,255,255,.1);border-radius:12px;
+  background:rgba(255,255,255,.05);color:var(--muted);
+  font-family:'Tajawal',sans-serif;font-size:1em;font-weight:700;cursor:pointer}
+
+/* ═══ TEACHER DASHBOARD ═══ */
+.teacher-wrap{max-width:920px;width:100%;margin:0 auto}
+.teacher-card{background:var(--card);border-radius:24px;overflow:hidden;
+  box-shadow:var(--shadow);border:1px solid rgba(99,102,241,.2)}
+.t-header{background:linear-gradient(135deg,#1e1b4b,#312e81);
+  padding:20px 28px;display:flex;justify-content:space-between;align-items:center}
+.t-header h1{font-size:1.3em;font-weight:900;color:#fff}
+.back-btn{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2);
+  border-radius:12px;padding:8px 18px;font-family:'Tajawal',sans-serif;
+  font-size:.9em;font-weight:800;cursor:pointer;transition:.2s}
+.back-btn:hover{background:rgba(255,255,255,.2)}
+.t-body{padding:24px;overflow-x:auto}
+.t-table{width:100%;border-collapse:collapse}
+.t-table th{padding:12px 14px;font-size:.82em;font-weight:800;
+  color:var(--muted);text-align:right;border-bottom:2px solid rgba(255,255,255,.06);
+  text-transform:uppercase;letter-spacing:.5px}
+.t-table td{padding:13px 14px;border-bottom:1px solid rgba(255,255,255,.05);vertical-align:middle}
+.t-table tr:hover td{background:rgba(99,102,241,.06)}
+.t-name{font-weight:900;font-size:1em;color:var(--text)}
+.t-lvl-wrap{display:flex;flex-direction:column;align-items:center;gap:5px}
+.t-lvl-txt{font-size:.82em;font-weight:700;color:#a5b4fc}
+.t-prog{width:120px;height:8px;background:rgba(255,255,255,.1);border-radius:4px;overflow:hidden}
+.t-prog-fill{height:100%;border-radius:4px;transition:width .5s}
+.badge-done{background:rgba(34,197,94,.15);color:#86efac;border:1px solid rgba(34,197,94,.3);
+  border-radius:20px;padding:4px 12px;font-size:.78em;font-weight:800}
+.badge-prog{background:rgba(251,191,36,.12);color:#fde68a;border:1px solid rgba(251,191,36,.25);
+  border-radius:20px;padding:4px 12px;font-size:.78em;font-weight:800}
+.t-time{font-size:.8em;color:var(--muted);font-weight:600}
+.del-btn{background:rgba(239,68,68,.12);color:#f87171;border:1px solid rgba(239,68,68,.2);
+  border-radius:9px;padding:4px 12px;font-family:'Tajawal',sans-serif;font-size:.8em;
+  font-weight:700;cursor:pointer;transition:.2s}
+.del-btn:hover{background:rgba(239,68,68,.25);color:var(--red)}
+.t-empty{padding:40px;text-align:center;color:var(--muted);font-weight:700;font-size:1em}
+</style>
 </head>
 <body>
-    <div id="root"></div>
 
-    <script type="text/babel">
-        const { useState, useEffect } = React;
+<!-- ═══ HOME VIEW ═══ -->
+<div class="view active" id="homeView">
+  <div class="home-card">
+    <span class="home-icon">🔁</span>
+    <h1>تحدي التكرار</h1>
+    <p>ثلاثة مستويات متصاعدة — هل أنتِ مستعدة؟</p>
+    <input type="text" id="nameSelect" class="name-sel" placeholder="اكتبي اسمكِ هنا ..." style="cursor:text;text-align:center;font-size:1.05em" />
+    <button class="go-btn" id="goBtn">انطلاق 🚀</button>
+    <button class="teacher-link" id="teacherBtn">لوحة المعلمة 👩‍🏫</button>
+  </div>
+</div>
 
-        function App() {
-            const [view, setView] = useState('home'); 
-            const [students, setStudents] = useState([]);
-            const [currentStudentName, setCurrentStudentName] = useState('');
-            const [currentLevel, setCurrentLevel] = useState(1);
-            const [feedback, setFeedback] = useState({ q1: null, q2: null, l3: null });
-            
-            const [l1Answers, setL1Answers] = useState({ q1: null, q2: null });
-            const [l2Answers, setL2Answers] = useState({ q1: null, q2: null });
-            const [blanks, setBlanks] = useState([null, null, null, null, null]);
+<!-- ═══ STUDENT VIEW ═══ -->
+<div class="view top" id="studentView">
+  <div class="student-card">
+    <div class="level-header">
+      <span class="lh-title" id="lvlTitle">المستوى 1: صح أو خطأ</span>
+      <span class="lh-name" id="lvlName"></span>
+    </div>
+    <div class="prog-bar"><div class="prog-fill" id="progFill" style="width:33%"></div></div>
+    <div class="level-body" id="levelBody"></div>
+  </div>
+</div>
 
-            const [showTeacherAuth, setShowTeacherAuth] = useState(false);
-            const [passInput, setPassInput] = useState('');
+<!-- ═══ ENCOURAGEMENT OVERLAY ═══ -->
+<div class="overlay" id="encOverlay" style="display:none">
+  <div class="enc-card">
+    <span class="enc-icon">🎉</span>
+    <h2>رائعة جداً!</h2>
+    <p id="encMsg">أنهيتِ المستوى الأول بنجاح!</p>
+    <button class="enc-btn" id="encBtn">المستوى التالي 🚀</button>
+  </div>
+</div>
 
-            const getLevelTitle = (num) => {
-                switch(num) {
-                    case 1: return "المستوى 1: صح أو خطأ";
-                    case 2: return "المستوى 2: أختر الإجابة الصحيحة";
-                    case 3: return "المستوى 3: أكمل الفراغات";
-                    default: return "";
-                }
-            };
+<!-- ═══ FINAL OVERLAY ═══ -->
+<div class="final-overlay" id="finalOverlay" style="display:none">
+  <div class="final-card">
+    <span class="final-trophy">🏆</span>
+    <h2>بطلة البرمجة!</h2>
+    <div class="final-name" id="finalNameTxt"></div>
+    <p class="final-msg">أكملتِ جميع المستويات الثلاثة!<br>لقد أصبحتِ خبيرة في التكرار. ✨</p>
+    <div class="final-box">استمري في البرمجة لتغيري العالم! 🌍</div>
+    <button class="replay-btn" onclick="location.reload()">🔄 العودة للبداية</button>
+  </div>
+</div>
 
-            const startPlay = (name) => {
-                if (!name.trim()) return;
-                const trimmedName = name.trim();
-                setStudents(prev => {
-                    const exists = prev.find(s => s.name === trimmedName);
-                    if (!exists) {
-                        return [...prev, { 
-                            id: Date.now(), 
-                            name: trimmedName, 
-                            level: 1, 
-                            isCompleted: false,
-                            lastUpdate: new Date().toLocaleTimeString('ar-SA') 
-                        }];
-                    }
-                    return prev;
-                });
-                setCurrentStudentName(trimmedName);
-                setCurrentLevel(1);
-                setView('student');
-                resetLevelStates();
-            };
+<!-- ═══ TEACHER MODAL ═══ -->
+<div class="modal-overlay" id="teacherModal">
+  <div class="modal-card">
+    <h2>🔐 دخول المعلمة</h2>
+    <input type="password" class="pass-input" id="passInput" placeholder="••••" />
+    <div class="modal-btns">
+      <button class="modal-ok" id="passOk">دخول</button>
+      <button class="modal-cancel" id="passCancel">إلغاء</button>
+    </div>
+  </div>
+</div>
 
-            const trackProgress = (levelNum, isFinal = false) => {
-                setStudents(prev => prev.map(s => 
-                    s.name === currentStudentName 
-                    ? { ...s, level: levelNum, isCompleted: isFinal, lastUpdate: new Date().toLocaleTimeString('ar-SA') } 
-                    : s
-                ));
-            };
+<!-- ═══ TEACHER VIEW ═══ -->
+<div class="view top" id="teacherView" style="display:none;flex-direction:column;padding:20px">
+  <div class="teacher-card teacher-wrap">
+    <div class="t-header">
+      <h1>📊 نتائج تحدي التكرار</h1>
+      <button class="back-btn" id="backBtn">← خروج</button>
+    </div>
+    <div class="t-body">
+      <table class="t-table">
+        <thead>
+          <tr>
+            <th>اسم الطالبة</th>
+            <th style="text-align:center">التقدم</th>
+            <th style="text-align:center">الحالة</th>
+            <th style="text-align:center">آخر تحديث</th>
+            <th style="text-align:center">إجراء</th>
+          </tr>
+        </thead>
+        <tbody id="teacherBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
 
-            const resetLevelStates = () => {
-                setFeedback({ q1: null, q2: null, l3: null });
-                setL1Answers({ q1: null, q2: null });
-                setL2Answers({ q1: null, q2: null });
-                setBlanks([null, null, null, null, null]);
-            };
+<script>
+/* ═══════════════════════════════
+   STATE
+═══════════════════════════════ */
+const DB   = 'https://cyber-safety-class-default-rtdb.firebaseio.com';
+const PATH = 'loops-challenge';
 
-            const handleCheckLevel1 = () => {
-                const q1Correct = l1Answers.q1 === true; 
-                const q2Correct = l1Answers.q2 === true;
-                setFeedback({ ...feedback, q1: q1Correct ? 'correct' : 'wrong', q2: q2Correct ? 'correct' : 'wrong' });
-                if (q1Correct && q2Correct) {
-                    setTimeout(() => { trackProgress(2); setView('encouragement'); }, 600);
-                }
-            };
+let currentStudent = '';
+let currentLevel   = 1;
+let l1Answers      = {q1:null, q2:null};
+let l2Answers      = {q1:null, q2:null};
+let blanks         = [null,null,null,null,null];
+let l1Checked      = false;
+let l2Checked      = false;
 
-            const handleCheckLevel2 = () => {
-                const q1Correct = l2Answers.q1 === 'b';
-                const q2Correct = l2Answers.q2 === 'a';
-                setFeedback({ ...feedback, q1: q1Correct ? 'correct' : 'wrong', q2: q2Correct ? 'correct' : 'wrong' });
-                if (q1Correct && q2Correct) {
-                    setTimeout(() => { trackProgress(3); setView('encouragement'); }, 600);
-                }
-            };
+const CORRECT_WORDS = ['حالة منطقية','صحيحة','تخطي','الأوامر','تنفيذها'];
 
-            const handleCheckLevel3 = () => {
-                const correctWords = ['حالة منطقية', 'صحيحة', 'تخطي', 'الأوامر', 'تنفيذها'];
-                if (blanks.includes(null)) {
-                    setFeedback({...feedback, l3: 'incomplete'});
-                    return;
-                }
-                if (blanks.every((w, i) => w === correctWords[i])) {
-                    setFeedback({...feedback, l3: 'correct'});
-                    setTimeout(() => { trackProgress(3, true); setView('final'); }, 800);
-                } else {
-                    setFeedback({...feedback, l3: 'wrong'});
-                }
-            };
+/* ═══ VIEWS ═══ */
+function showView(id){
+  document.querySelectorAll('.view').forEach(v=>{v.style.display='none';v.classList.remove('active');});
+  const el=document.getElementById(id);
+  if(el){el.style.display=el.classList.contains('top')?'flex':'flex';el.classList.add('active');}
+}
 
-            const getBtnClass = (qKey, btnValue, currentVal) => {
-                let base = "flex-1 py-3 px-3 rounded-xl font-bold border-2 transition-all duration-200 transform active:scale-95 text-sm md:text-base text-right ";
-                if (currentVal === btnValue) {
-                    if (feedback[qKey] === 'correct') return base + "bg-green-500 border-green-600 text-white";
-                    if (feedback[qKey] === 'wrong') return base + "bg-red-500 border-red-600 text-white animate-shake";
-                    return base + "bg-indigo-600 border-indigo-700 text-white shadow-md";
-                }
-                return base + "bg-white border-gray-100 text-gray-700 hover:border-indigo-200 shadow-sm";
-            };
+/* ═══ HOME BUTTONS ═══ */
+document.getElementById('goBtn').addEventListener('click',()=>{
+  const name=document.getElementById('nameSelect').value.trim();
+  if(!name){alert('اكتبي اسمكِ أولاً!');return;}
+  currentStudent=name;
+  currentLevel=1;l1Answers={q1:null,q2:null};l2Answers={q1:null,q2:null};blanks=[null,null,null,null,null];
+  l1Checked=false;l2Checked=false;
+  document.getElementById('lvlName').textContent=name;
+  saveToFirebase(1,false);
+  renderLevel(1);
+  showView('studentView');
+});
 
-            return (
-                <div className="min-h-screen flex flex-col items-center justify-center p-4">
-                    
-                    {view === 'home' && (
-                        <div className="bg-white p-10 rounded-[2.5rem] shadow-2xl w-full max-w-md animate-pop-in text-center border-b-8 border-indigo-200">
-                          
-                            <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-indigo-600 p-4 rounded-full shadow-xl">
-                                <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                            </div> 
-                            <h1 className="text-3xl font-black text-indigo-900 mb-2 mt-4">تحدي التكرار</h1>
-                            <br/>
-                            <input id="stdName" type="text" placeholder="اكتبي اسمكِ ..." className="w-full p-4 border-2 border-indigo-50 rounded-2xl mb-4 text-center text-xl font-bold outline-none focus:border-indigo-500 bg-indigo-50/30 transition-all" />
-                            <button onClick={() => startPlay(document.getElementById('stdName').value)} className="w-full gradient-bg text-white py-4 rounded-2xl text-xl font-black shadow-xl hover:opacity-90 active:scale-95 transition-all mb-4">انطـلاق 🚀</button>
-                            <button onClick={() => setShowTeacherAuth(true)} className="text-indigo-400 font-bold text-sm hover:underline">لوحة المعلمة 👩‍🏫</button>
+document.getElementById('nameSelect').addEventListener('keydown',e=>{if(e.key==='Enter') document.getElementById('goBtn').click();});
+document.getElementById('teacherBtn').addEventListener('click',()=>{
+  document.getElementById('teacherModal').classList.add('show');
+  document.getElementById('passInput').value='';
+});
+document.getElementById('passCancel').addEventListener('click',()=>{
+  document.getElementById('teacherModal').classList.remove('show');
+});
+document.getElementById('passOk').addEventListener('click',()=>{
+  if(document.getElementById('passInput').value==='2023'){
+    document.getElementById('teacherModal').classList.remove('show');
+    loadTeacherData();
+    showTeacherView();
+  }else{
+    document.getElementById('passInput').value='';
+    document.getElementById('passInput').style.borderColor='var(--red)';
+    setTimeout(()=>document.getElementById('passInput').style.borderColor='',1000);
+  }
+});
+document.getElementById('passInput').addEventListener('keydown',e=>{if(e.key==='Enter') document.getElementById('passOk').click();});
+document.getElementById('backBtn').addEventListener('click',()=>showView('homeView'));
 
-                            {showTeacherAuth && (
-                                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                                    <div className="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-xs animate-pop-in">
-                                        <h2 className="text-xl font-black mb-4">الدخول للمعلمة</h2>
-                                        <input type="password" placeholder="كلمة المرور" value={passInput} onChange={(e) => setPassInput(e.target.value)} className="w-full p-3 border-2 rounded-xl mb-4 text-center outline-none" />
-                                        <div className="flex gap-2">
-                                            <button onClick={() => { if (passInput === '2023') { setView('teacher'); setShowTeacherAuth(false); setPassInput(''); } else { alert('كلمة مرور خاطئة!'); } }} className="flex-1 bg-indigo-600 text-white py-2 rounded-xl font-bold">دخول</button>
-                                            <button onClick={() => setShowTeacherAuth(false)} className="flex-1 bg-gray-100 py-2 rounded-xl font-bold">إلغاء</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    )}
+/* ═══ TEACHER VIEW ═══ */
+function showTeacherView(){
+  document.querySelectorAll('.view').forEach(v=>{v.style.display='none';v.classList.remove('active');});
+  const tv=document.getElementById('teacherView');
+  tv.style.display='flex';tv.classList.add('active');
+}
 
-                    {view === 'student' && (
-                        <div className="w-full max-w-2xl bg-white rounded-[2.5rem] shadow-2xl overflow-hidden animate-pop-in border-b-8 border-indigo-100">
-                            <div className="gradient-bg p-6 text-white flex justify-between items-center shadow-lg">
-                                <span className="font-black text-lg md:text-xl">{getLevelTitle(currentLevel)}</span>
-                                <span className="bg-white/20 px-4 py-1 rounded-full text-xs md:text-sm font-bold">{currentStudentName}</span>
-                            </div>
-                            <div className="p-8">
-                                {currentLevel === 1 && (
-                                    <div className="space-y-8">
-                                        <div className="bg-indigo-50/30 p-5 rounded-2xl border border-indigo-50">
-                                            <p className="text-lg font-black mb-4 text-indigo-900 leading-relaxed">س1: هل التكرار يعني كتابة الكود مرة واحدة فقط لينفذ عدة مرات؟</p>
-                                            <div className="flex gap-4">
-                                                <button onClick={() => {setL1Answers({...l1Answers, q1: true}); setFeedback({...feedback, q1: null})}} className={getBtnClass('q1', true, l1Answers.q1).replace('text-right', 'text-center')}>صح ✅</button>
-                                                <button onClick={() => {setL1Answers({...l1Answers, q1: false}); setFeedback({...feedback, q1: null})}} className={getBtnClass('q1', false, l1Answers.q1).replace('text-right', 'text-center')}>خطأ ❌</button>
-                                            </div>
-                                        </div>
-                                        <div className="bg-indigo-50/30 p-5 rounded-2xl border border-indigo-50">
-                                            <p className="text-lg font-black mb-4 text-indigo-900 leading-relaxed">س2: التكرار المشروط يتوقف عندما تصبح الحالة "صحيحة"؟</p>
-                                            <div className="flex gap-4">
-                                                <button onClick={() => {setL1Answers({...l1Answers, q2: true}); setFeedback({...feedback, q2: null})}} className={getBtnClass('q2', true, l1Answers.q2).replace('text-right', 'text-center')}>صح ✅</button>
-                                                <button onClick={() => {setL1Answers({...l1Answers, q2: false}); setFeedback({...feedback, q2: null})}} className={getBtnClass('q2', false, l1Answers.q2).replace('text-right', 'text-center')}>خطأ ❌</button>
-                                            </div>
-                                        </div>
-                                        <button onClick={handleCheckLevel1} className="w-full gradient-bg text-white py-5 rounded-2xl font-black text-xl shadow-lg mt-4 active:scale-95 transition-all">تأكيـد للانتقال للمستوى2 🚀</button>
-                                    </div>
-                                )}
-                                {currentLevel === 2 && (
-                                    <div className="space-y-8">
-                                        <div className="bg-indigo-50/30 p-5 rounded-2xl">
-                                            <p className="text-lg font-black mb-4 text-indigo-900">س1: متى نستخدم التكرار في البرمجة؟</p>
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                                <button onClick={() => {setL2Answers({...l2Answers, q1: 'a'}); setFeedback({...feedback, q1: null})}} className={getBtnClass('q1', 'a', l2Answers.q1)}>أ) لطباعة جملة واحدة فقط.</button>
-                                                <button onClick={() => {setL2Answers({...l2Answers, q1: 'b'}); setFeedback({...feedback, q1: null})}} className={getBtnClass('q1', 'b', l2Answers.q1)}>ب) لتنفيذ مجموعة أوامر عدة مرات.</button>
-                                                <button onClick={() => {setL2Answers({...l2Answers, q1: 'c'}); setFeedback({...feedback, q1: null})}} className={getBtnClass('q1', 'c', l2Answers.q1)}>ج) لإغلاق الحاسوب فجأة.</button>
-                                                <button onClick={() => {setL2Answers({...l2Answers, q1: 'd'}); setFeedback({...feedback, q1: null})}} className={getBtnClass('q1', 'd', l2Answers.q1)}>د) لتغيير ألوان شريط المهام.</button>
-                                            </div>
-                                        </div>
-                                        <div className="bg-indigo-50/30 p-5 rounded-2xl">
-                                            <p className="text-lg font-black mb-4 text-indigo-900">س2: التكرار المشروط هو التكرار الذي يعتمد على:</p>
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                                <button onClick={() => {setL2Answers({...l2Answers, q2: 'a'}); setFeedback({...feedback, q2: null})}} className={getBtnClass('q2', 'a', l2Answers.q2)}>أ) حالة منطقية (Condition)</button>
-                                                <button onClick={() => {setL2Answers({...l2Answers, q2: 'b'}); setFeedback({...feedback, q2: null})}} className={getBtnClass('q2', 'b', l2Answers.q2)}>ب) لون الكود وشكله</button>
-                                                <button onClick={() => {setL2Answers({...l2Answers, q2: 'c'}); setFeedback({...feedback, q2: null})}} className={getBtnClass('q2', 'c', l2Answers.q2)}>ج) حجم لوحة المفاتيح</button>
-                                                <button onClick={() => {setL2Answers({...l2Answers, q2: 'd'}); setFeedback({...feedback, q2: null})}} className={getBtnClass('q2', 'd', l2Answers.q2)}>د) سرعة الماوس</button>
-                                            </div>
-                                        </div>
-                                        <button onClick={handleCheckLevel2} className="w-full gradient-bg text-white py-5 rounded-2xl font-black text-xl shadow-lg active:scale-95 transition-all">تأكيـد للانتقال للمستوى 3✨</button>
-                                    </div>
-                                )}
-                                {currentLevel === 3 && (
-                                    <div className="space-y-6">
-                                        <h2 className="text-xl font-black text-indigo-900 mb-4">قومي بسحب الكلمات لملء الفراغات:</h2>
-                                        
-                                        {feedback.l3 === 'wrong' && (
-                                            <div className="bg-red-50 text-red-600 p-4 rounded-xl font-bold border-2 border-red-100 flex items-center gap-2 animate-shake">
-                                                <span>❌ الترتيب خاطئ يا بطلة! راجعي ترتيب الكلمات لتصححي إجابتكِ.</span>
-                                            </div>
-                                        )}
-                                        {feedback.l3 === 'incomplete' && (
-                                            <div className="bg-amber-50 text-amber-700 p-4 rounded-xl font-bold border-2 border-amber-100">
-                                                <span>💡 يرجى تعبئة كافة الفراغات لإكمال الجملة.</span>
-                                            </div>
-                                        )}
+/* ═══ FIREBASE ═══ */
+async function saveToFirebase(level, completed){
+  const key=encodeURIComponent(currentStudent.replace(/\s+/g,'_'));
+  const data={name:currentStudent,level,isCompleted:completed,
+    lastUpdate:new Date().toLocaleTimeString('ar-SA')};
+  try{
+    await fetch(`${DB}/${PATH}/${key}.json`,{method:'PUT',body:JSON.stringify(data)});
+  }catch(e){}
+}
 
-                                        <div className="flex flex-wrap gap-3 p-4 bg-slate-50 rounded-2xl border-2 border-slate-100 shadow-inner">
-                                            {['تنفيذها', 'تخطي', 'حالة منطقية', 'الأوامر', 'صحيحة'].map(word => (
-                                                <button 
-                                                    key={word} 
-                                                    onClick={() => {
-                                                        const emptyIdx = blanks.indexOf(null);
-                                                        if (emptyIdx !== -1 && !blanks.includes(word)) {
-                                                            const nextBlanks = [...blanks];
-                                                            nextBlanks[emptyIdx] = word;
-                                                            setBlanks(nextBlanks);
-                                                            setFeedback({...feedback, l3: null});
-                                                        }
-                                                    }}
-                                                    disabled={blanks.includes(word)}
-                                                    className={`px-4 py-2 rounded-xl font-bold transition-all shadow-sm ${blanks.includes(word) ? 'bg-gray-200 text-gray-400 scale-95' : 'bg-white text-indigo-700 hover:bg-indigo-100 active:scale-90 border-2 border-indigo-50'}`}
-                                                >
-                                                    {word}
-                                                </button>
-                                            ))}
-                                        </div>
+async function loadTeacherData(){
+  try{
+    const r=await fetch(`${DB}/${PATH}.json`);
+    const data=await r.json()||{};
+    renderTeacherTable(Object.values(data).filter(d=>d&&d.name));
+  }catch(e){renderTeacherTable([]);}
+}
 
-                                        <div className={`p-8 border-4 border-dashed rounded-[2rem] leading-relaxed text-lg font-bold transition-all ${feedback.l3 === 'wrong' ? 'border-red-300 bg-red-50 text-red-900' : 'border-indigo-100 bg-slate-50 text-slate-700'}`}>
-                                            يعتمد التكرار المشروط على <span className="text-indigo-600 bg-white px-2 py-1 rounded-lg border border-indigo-100 mx-1">{blanks[0] || "......"}</span> فإذا كانت <span className="text-indigo-600 bg-white px-2 py-1 rounded-lg border border-indigo-100 mx-1">{blanks[1] || "......"}</span> سيستمر، وإلا سيتم <span className="text-indigo-600 bg-white px-2 py-1 rounded-lg border border-indigo-100 mx-1">{blanks[2] || "......"}</span> الحلقة. <br/> التكرار هو تكرار مجموعة من <span className="text-indigo-600 bg-white px-2 py-1 rounded-lg border border-indigo-100 mx-1">{blanks[3] || "......"}</span> لتسهيل الـ <span className="text-indigo-600 bg-white px-2 py-1 rounded-lg border border-indigo-100 mx-1">{blanks[4] || "......"}</span> البرمجي.
-                                        </div>
+function renderTeacherTable(students){
+  const tbody=document.getElementById('teacherBody');
+  if(!students.length){
+    tbody.innerHTML=`<tr><td colspan="5" class="t-empty">لا توجد بيانات حالياً .. بانتظار دخول الطالبات 🚀</td></tr>`;
+    return;
+  }
+  tbody.innerHTML=students.sort((a,b)=>(b.isCompleted?1:0)-(a.isCompleted?1:0)||(b.level-a.level))
+    .map(s=>{
+      const pct=s.isCompleted?100:Math.round((s.level/3)*100);
+      const fillColor=s.isCompleted?'#22c55e':'#6366f1';
+      return `<tr>
+        <td class="t-name">${s.name}</td>
+        <td>
+          <div class="t-lvl-wrap">
+            <span class="t-lvl-txt">${s.isCompleted?'أنهت جميع المستويات':'المستوى '+s.level+' من 3'}</span>
+            <div class="t-prog"><div class="t-prog-fill" style="width:${pct}%;background:${fillColor}"></div></div>
+          </div>
+        </td>
+        <td style="text-align:center">
+          ${s.isCompleted?'<span class="badge-done">مكتمل 🏁</span>':'<span class="badge-prog">قيد التقدم ⏳</span>'}
+        </td>
+        <td class="t-time" style="text-align:center">${s.lastUpdate||'—'}</td>
+        <td style="text-align:center">
+          <button class="del-btn" onclick="deleteStudent('${encodeURIComponent(s.name.replace(/\s+/g,'_'))}')">حذف</button>
+        </td>
+      </tr>`;
+    }).join('');
+}
 
-                                        <div className="flex gap-4">
-                                            <button onClick={() => {setBlanks([null,null,null,null,null]); setFeedback({...feedback, l3: null});}} className="flex-1 bg-slate-200 py-4 rounded-2xl font-bold hover:bg-slate-300 transition-colors">إعادة ضبط 🔄</button>
-                                            <button onClick={handleCheckLevel3} className="flex-[2] gradient-bg text-white py-4 rounded-2xl font-black text-xl shadow-xl hover:scale-105 transition-transform active:scale-95">فحص الإجابة 🏆</button>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    )}
+async function deleteStudent(key){
+  try{await fetch(`${DB}/${PATH}/${key}.json`,{method:'DELETE'});loadTeacherData();}catch(e){}
+}
 
-                    {view === 'encouragement' && (
-                        <div className="fixed inset-0 bg-indigo-900/80 backdrop-blur-md flex items-center justify-center z-50 p-4">
-                            <div className="bg-white p-10 rounded-[3rem] text-center animate-pop-in max-w-sm w-full shadow-2xl border-t-8 border-indigo-500">
-                                <div className="text-7xl mb-6">🎉</div>
-                                <h2 className="text-3xl font-black text-indigo-900 mb-2">رائعة جداً!</h2>
-                                <p className="text-gray-600 font-bold text-lg mb-8">لقد أنهيتِ {getLevelTitle(currentLevel)} بنجاح باهر.</p>
-                                <button onClick={() => { setView('student'); setCurrentLevel(currentLevel + 1); resetLevelStates(); }} className="w-full gradient-bg text-white py-5 rounded-2xl text-xl font-black shadow-lg">التالي 🚀</button>
-                            </div>
-                        </div>
-                    )}
+/* ═══ LEVEL RENDERING ═══ */
+const LVL_TITLES=['','المستوى 1: صح أو خطأ','المستوى 2: اختاري الإجابة','المستوى 3: أكملي الفراغات'];
+const LVL_PROG=['','33%','66%','100%'];
 
-                    {view === 'final' && (
-                        <div className="fixed inset-0 bg-indigo-950 flex items-center justify-center z-50 p-4 overflow-hidden">
-                            {[...Array(30)].map((_, i) => (
-                                <div key={i} className="confetti" style={{
-                                    left: Math.random()*100+'%', 
-                                    animationDelay: Math.random()*2+'s', 
-                                    backgroundColor: ['#fbbf24', '#ec4899', '#22d3ee', '#4ade80'][i%4],
-                                    width: (Math.random()*10+5)+'px',
-                                    height: (Math.random()*10+5)+'px'
-                                }}></div>
-                            ))}
-                            <div className="bg-white p-12 rounded-[4rem] text-center animate-pop-in max-w-md w-full shadow-2xl relative z-10 border-b-8 border-indigo-200">
-                                <div className="text-8xl mb-8 animate-bounce">🏆</div>
-                                <h2 className="text-4xl font-black text-indigo-900 mb-4">بطلة البرمجة!</h2>
-                                <p className="text-gray-600 font-black text-2xl mb-10 leading-relaxed">
-                                    أحسنتِ يا <span className="text-indigo-600">{currentStudentName}</span>!<br/>
-                                    لقد أصبحتِ خبيرة في التكرار.
-                                </p>
-                                <div className="p-4 bg-indigo-50 rounded-2xl border-2 border-indigo-100 font-bold text-indigo-800">
-                                    استمري في البرمجة لتغيري العالم! ✨
-                                </div>
-                            </div>
-                        </div>
-                    )}
+function renderLevel(lvl){
+  currentLevel=lvl;
+  document.getElementById('lvlTitle').textContent=LVL_TITLES[lvl];
+  document.getElementById('progFill').style.width=LVL_PROG[lvl];
+  const body=document.getElementById('levelBody');
+  if(lvl===1) body.innerHTML=renderL1();
+  else if(lvl===2) body.innerHTML=renderL2();
+  else if(lvl===3) {body.innerHTML=renderL3(); bindBlanks();}
+}
 
-                    {view === 'teacher' && (
-                        <div className="w-full max-w-5xl bg-white rounded-[2.5rem] shadow-2xl overflow-hidden animate-pop-in">
-                            <div className="bg-indigo-900 p-8 text-white flex justify-between items-center">
-                                <div><h1 className="text-2xl font-black">نتائج تحدي التكرار</h1></div>
-                                <button onClick={() => setView('home')} className="bg-indigo-800 px-6 py-2 rounded-xl font-bold border border-indigo-700 hover:bg-indigo-700 transition-colors">خروج</button>
-                            </div>
-                            <div className="p-8 overflow-x-auto">
-                                <table className="w-full text-right border-collapse">
-                                    <thead>
-                                        <tr className="border-b-2 border-slate-100 text-slate-400 font-black text-sm uppercase">
-                                            <th className="p-4">اسم الطالبة</th>
-                                            <th className="p-4 text-center w-1/4">مستوى الحل والتقدم</th>
-                                            <th className="p-4 text-center">الحالة</th>
-                                            <th className="p-4 text-center">آخر تحديث</th>
-                                            <th className="p-4 text-center">إجراء</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {students.length === 0 ? (
-                                            <tr><td colSpan="5" className="p-10 text-center text-slate-400 italic font-bold">لا توجد بيانات حالياً .. بانتظار دخول الطالبات 🚀</td></tr>
-                                        ) : (
-                                            students.map(s => (
-                                                <tr key={s.id} className="border-b border-slate-50 hover:bg-slate-50 transition-all">
-                                                    <td className="p-4 font-black text-indigo-900 text-lg">{s.name}</td>
-                                                    <td className="p-4">
-                                                        <div className="flex flex-col items-center gap-2">
-                                                            <span className="font-bold text-indigo-700 text-sm">
-                                                                {s.isCompleted ? "أنهت جميع المستويات" : `المستوى ${s.level} من 3`}
-                                                            </span>
-                                                            <div className="w-full bg-slate-200 rounded-full h-2.5 max-w-[150px] shadow-inner overflow-hidden">
-                                                                <div 
-                                                                    className={`h-2.5 rounded-full transition-all duration-500 ${s.isCompleted ? 'bg-green-500' : 'bg-indigo-500'}`} 
-                                                                    style={{width: s.isCompleted ? '100%' : `${(s.level / 3) * 100}%`}}>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                    <td className="p-4 text-center">
-                                                        {s.isCompleted ? 
-                                                            <span className="bg-green-100 text-green-700 px-4 py-1.5 rounded-full text-xs font-black border border-green-200 shadow-sm">مكتمل 🏁</span> : 
-                                                            <span className="bg-amber-100 text-amber-700 px-4 py-1.5 rounded-full text-xs font-black border border-amber-200 shadow-sm">قيد التقدم ⏳</span>
-                                                        }
-                                                    </td>
-                                                    <td className="p-4 text-center text-slate-400 text-sm font-bold">{s.lastUpdate}</td>
-                                                    <td className="p-4 text-center">
-                                                        <button onClick={() => setStudents(students.filter(std => std.id !== s.id))} className="text-red-400 hover:text-red-600 bg-red-50 hover:bg-red-100 px-3 py-1 rounded-lg font-bold transition-colors text-sm">حذف</button>
-                                                    </td>
-                                                </tr>
-                                            ))
-                                        )}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    )}
-                </div>
-            );
-        }
+/* ─── LEVEL 1 ─── */
+function renderL1(){
+  return `
+    <div class="lvl-badge">⭐ المستوى الأول</div>
+    <div class="q-card">
+      <div class="q-text">س1: هل التكرار يعني كتابة الكود مرة واحدة فقط لينفذ عدة مرات؟</div>
+      <div class="opts-2">
+        <button class="opt-btn ${l1Answers.q1===true?'selected':''}" id="l1q1-true" onclick="setL1('q1',true)">صح ✅</button>
+        <button class="opt-btn ${l1Answers.q1===false?'selected':''}" id="l1q1-false" onclick="setL1('q1',false)">خطأ ❌</button>
+      </div>
+    </div>
+    <div class="q-card">
+      <div class="q-text">س2: التكرار المشروط يتوقف عندما تصبح الحالة "خاطئة"؟</div>
+      <div class="opts-2">
+        <button class="opt-btn ${l1Answers.q2===true?'selected':''}" id="l1q2-true" onclick="setL1('q2',true)">صح ✅</button>
+        <button class="opt-btn ${l1Answers.q2===false?'selected':''}" id="l1q2-false" onclick="setL1('q2',false)">خطأ ❌</button>
+      </div>
+    </div>
+    <div id="l1-alert"></div>
+    <button class="confirm-btn" onclick="checkL1()">تأكيد والانتقال للمستوى 2 🚀</button>`;
+}
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
-    </script>
+function setL1(q,val){
+  if(l1Checked)return;
+  l1Answers[q]=val;
+  // Update button styles
+  ['true','false'].forEach(v=>{
+    const btn=document.getElementById(`l1${q}-${v}`);
+    if(btn){btn.className='opt-btn '+(String(l1Answers[q])===v?'selected':'');}
+  });
+}
+
+function checkL1(){
+  if(l1Answers.q1===null||l1Answers.q2===null){
+    document.getElementById('l1-alert').innerHTML='<div class="alert alert-warn">💡 يرجى الإجابة على كلا السؤالين.</div>';
+    return;
+  }
+  l1Checked=true;
+  const q1Ok=l1Answers.q1===true;
+  const q2Ok=l1Answers.q2===false; // التكرار المشروط يتوقف عندما تكون الحالة خاطئة ← صح
+  // Apply feedback
+  applyFeedback('l1q1-true',  q1Ok && l1Answers.q1===true,  !q1Ok && l1Answers.q1===true);
+  applyFeedback('l1q1-false', q1Ok && l1Answers.q1===false, !q1Ok && l1Answers.q1===false);
+  applyFeedback('l1q2-true',  q2Ok && l1Answers.q2===true,  !q2Ok && l1Answers.q2===true);
+  applyFeedback('l1q2-false', q2Ok && l1Answers.q2===false, !q2Ok && l1Answers.q2===false);
+
+  if(q1Ok&&q2Ok){
+    saveToFirebase(2,false);
+    setTimeout(()=>showEncouragement(1),600);
+  } else {
+    l1Checked=false; // allow retry
+    document.getElementById('l1-alert').innerHTML='<div class="alert alert-err">❌ إجابة أو أكثر خاطئة! حاولي مجدداً.</div>';
+    setTimeout(()=>{
+      document.querySelectorAll('.opt-btn').forEach(b=>{b.className='opt-btn';});
+      document.getElementById('l1q1-'+l1Answers.q1).className='opt-btn selected';
+      document.getElementById('l1q2-'+l1Answers.q2).className='opt-btn selected';
+    },1200);
+  }
+}
+
+/* ─── LEVEL 2 ─── */
+function renderL2(){
+  return `
+    <div class="lvl-badge">⭐⭐ المستوى الثاني</div>
+    <div class="q-card">
+      <div class="q-text">س1: متى نستخدم التكرار في البرمجة؟</div>
+      <div class="opts-4">
+        <button class="opt-btn ${l2Answers.q1==='a'?'selected':''}" id="l2q1-a" onclick="setL2('q1','a')">أ) لطباعة جملة واحدة فقط.</button>
+        <button class="opt-btn ${l2Answers.q1==='b'?'selected':''}" id="l2q1-b" onclick="setL2('q1','b')">ب) لتنفيذ مجموعة أوامر عدة مرات.</button>
+        <button class="opt-btn ${l2Answers.q1==='c'?'selected':''}" id="l2q1-c" onclick="setL2('q1','c')">ج) لإغلاق الحاسوب فجأة.</button>
+        <button class="opt-btn ${l2Answers.q1==='d'?'selected':''}" id="l2q1-d" onclick="setL2('q1','d')">د) لتغيير ألوان شريط المهام.</button>
+      </div>
+    </div>
+    <div class="q-card">
+      <div class="q-text">س2: التكرار المشروط هو التكرار الذي يعتمد على:</div>
+      <div class="opts-4">
+        <button class="opt-btn ${l2Answers.q2==='a'?'selected':''}" id="l2q2-a" onclick="setL2('q2','a')">أ) حالة منطقية (Condition)</button>
+        <button class="opt-btn ${l2Answers.q2==='b'?'selected':''}" id="l2q2-b" onclick="setL2('q2','b')">ب) لون الكود وشكله</button>
+        <button class="opt-btn ${l2Answers.q2==='c'?'selected':''}" id="l2q2-c" onclick="setL2('q2','c')">ج) حجم لوحة المفاتيح</button>
+        <button class="opt-btn ${l2Answers.q2==='d'?'selected':''}" id="l2q2-d" onclick="setL2('q2','d')">د) سرعة الماوس</button>
+      </div>
+    </div>
+    <div id="l2-alert"></div>
+    <button class="confirm-btn" onclick="checkL2()">تأكيد والانتقال للمستوى 3 ✨</button>`;
+}
+
+function setL2(q,val){
+  if(l2Checked)return;
+  l2Answers[q]=val;
+  ['a','b','c','d'].forEach(v=>{
+    const btn=document.getElementById(`l2${q}-${v}`);
+    if(btn) btn.className='opt-btn '+(l2Answers[q]===v?'selected':'');
+  });
+}
+
+function checkL2(){
+  if(!l2Answers.q1||!l2Answers.q2){
+    document.getElementById('l2-alert').innerHTML='<div class="alert alert-warn">💡 يرجى الإجابة على كلا السؤالين.</div>';
+    return;
+  }
+  l2Checked=true;
+  const q1Ok=l2Answers.q1==='b';
+  const q2Ok=l2Answers.q2==='a';
+  ['a','b','c','d'].forEach(v=>{
+    applyFeedback('l2q1-'+v, q1Ok&&v==='b', !q1Ok&&l2Answers.q1===v);
+    applyFeedback('l2q2-'+v, q2Ok&&v==='a', !q2Ok&&l2Answers.q2===v);
+  });
+  if(q1Ok&&q2Ok){
+    saveToFirebase(3,false);
+    setTimeout(()=>showEncouragement(2),600);
+  } else {
+    l2Checked=false;
+    document.getElementById('l2-alert').innerHTML='<div class="alert alert-err">❌ إجابة أو أكثر خاطئة! حاولي مجدداً.</div>';
+    setTimeout(()=>{
+      ['a','b','c','d'].forEach(v=>{
+        const b1=document.getElementById('l2q1-'+v);const b2=document.getElementById('l2q2-'+v);
+        if(b1) b1.className='opt-btn '+(l2Answers.q1===v?'selected':'');
+        if(b2) b2.className='opt-btn '+(l2Answers.q2===v?'selected':'');
+      });
+    },1200);
+  }
+}
+
+/* ─── LEVEL 3 ─── */
+function renderL3(){
+  return `
+    <div class="lvl-badge">⭐⭐⭐ المستوى الثالث</div>
+    <div id="l3-alert"></div>
+    <div class="words-bank" id="wordsBank">
+      ${['تنفيذها','تخطي','حالة منطقية','الأوامر','صحيحة'].map(w=>`
+        <div class="word-chip ${blanks.includes(w)?'used':''}" id="wc-${w.replace(/\s/g,'_')}" onclick="placeWord('${w}')">${w}</div>
+      `).join('')}
+    </div>
+    <div class="blank-text" id="blankText">
+      يعتمد التكرار المشروط على
+      <span class="blank ${blanks[0]?'':'empty'}" id="b0" onclick="removeBlank(0)">${blanks[0]||'......'}</span>
+      فإذا كانت
+      <span class="blank ${blanks[1]?'':'empty'}" id="b1" onclick="removeBlank(1)">${blanks[1]||'......'}</span>
+      سيستمر، وإلا سيتم
+      <span class="blank ${blanks[2]?'':'empty'}" id="b2" onclick="removeBlank(2)">${blanks[2]||'......'}</span>
+      الحلقة.<br/>
+      التكرار هو تكرار مجموعة من
+      <span class="blank ${blanks[3]?'':'empty'}" id="b3" onclick="removeBlank(3)">${blanks[3]||'......'}</span>
+      لتسهيل الـ
+      <span class="blank ${blanks[4]?'':'empty'}" id="b4" onclick="removeBlank(4)">${blanks[4]||'......'}</span>
+      البرمجي.
+    </div>
+    <div class="l3-actions">
+      <button class="reset-btn" onclick="resetBlanks()">إعادة ضبط 🔄</button>
+      <button class="confirm-btn" style="margin-top:0" onclick="checkL3()">فحص الإجابة 🏆</button>
+    </div>`;
+}
+
+function bindBlanks(){/* blanks updated via placeWord / removeBlank */}
+
+function placeWord(word){
+  if(blanks.includes(word))return;
+  const emptyIdx=blanks.indexOf(null);
+  if(emptyIdx===-1)return;
+  blanks[emptyIdx]=word;
+  refreshL3();
+}
+
+function removeBlank(idx){
+  if(!blanks[idx])return;
+  blanks[idx]=null;
+  document.getElementById('l3-alert').innerHTML='';
+  refreshL3();
+}
+
+function resetBlanks(){blanks=[null,null,null,null,null];document.getElementById('l3-alert').innerHTML='';refreshL3();}
+
+function refreshL3(){
+  const bText=document.getElementById('blankText');
+  if(bText) bText.className='blank-text';
+  [0,1,2,3,4].forEach(i=>{
+    const el=document.getElementById('b'+i);
+    if(el){el.textContent=blanks[i]||'......';el.className='blank '+(blanks[i]?'':'empty');}
+  });
+  const allWords=['تنفيذها','تخطي','حالة منطقية','الأوامر','صحيحة'];
+  allWords.forEach(w=>{
+    const chip=document.getElementById('wc-'+w.replace(/\s/g,'_'));
+    if(chip) chip.className='word-chip '+(blanks.includes(w)?'used':'');
+  });
+}
+
+function checkL3(){
+  if(blanks.includes(null)){
+    document.getElementById('l3-alert').innerHTML='<div class="alert alert-warn">💡 يرجى تعبئة كافة الفراغات لإكمال الجملة.</div>';
+    return;
+  }
+  const ok=blanks.every((w,i)=>w===CORRECT_WORDS[i]);
+  if(ok){
+    saveToFirebase(3,true);
+    setTimeout(()=>showFinal(),600);
+  } else {
+    document.getElementById('l3-alert').innerHTML='<div class="alert alert-err">❌ الترتيب خاطئ يا بطلة! انقري على الكلمات في الفراغات لإزالتها وحاولي مجدداً.</div>';
+    document.getElementById('blankText').className='blank-text wrong-state';
+  }
+}
+
+/* ─── ENCOURAGEMENT ─── */
+function showEncouragement(completedLvl){
+  const msgs=['','أنهيتِ مستوى الصح والخطأ بنجاح!','أنهيتِ مستوى الاختيار من متعدد!'];
+  document.getElementById('encMsg').textContent='لقد '+msgs[completedLvl];
+  document.getElementById('encOverlay').style.display='flex';
+  document.getElementById('encBtn').onclick=()=>{
+    document.getElementById('encOverlay').style.display='none';
+    renderLevel(completedLvl+1);
+  };
+}
+
+/* ─── FINAL ─── */
+function showFinal(){
+  document.getElementById('finalNameTxt').textContent='أحسنتِ يا '+currentStudent+'!';
+  document.getElementById('finalOverlay').style.display='flex';
+  spawnConfetti(40);
+}
+
+/* ─── HELPERS ─── */
+function applyFeedback(id,isCorrect,isWrong){
+  const btn=document.getElementById(id);
+  if(!btn)return;
+  if(isCorrect) btn.classList.add('correct');
+  else if(isWrong) btn.classList.add('wrong');
+}
+
+function spawnConfetti(n=20){
+  const cols=['#fbbf24','#ec4899','#22d3ee','#4ade80','#a855f7','#f97316'];
+  for(let i=0;i<n;i++) setTimeout(()=>{
+    const el=document.createElement('div');el.className='conf';
+    el.style.cssText=`left:${Math.random()*100}vw;top:-10px;
+      background:${cols[Math.floor(Math.random()*cols.length)]};
+      width:${5+Math.random()*9}px;height:${5+Math.random()*9}px;
+      border-radius:${Math.random()>.5?'50%':'2px'};
+      animation-duration:${2+Math.random()*2}s;animation-delay:${Math.random()*.8}s`;
+    document.body.appendChild(el);setTimeout(()=>el.remove(),4000);
+  },i*60);
+}
+</script>
 </body>
 </html>
